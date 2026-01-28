@@ -169,6 +169,41 @@ private void SwapTiles(Cell a, Cell b)
         SwapTiles(a, b);
         return false;
     }
+
+private void ApplyGravity()
+{
+    bool moved;
+    do
+    {
+        moved = false;
+        for(int x = 0; x < width; x++)
+        {
+            for(int y = 0; y < height - 1; y++)
+            {
+                if(cells[x,y].Tile != null) continue;
+                
+                int yAbove  = -1;
+
+                for(int checkY = y + 1; checkY < height; checkY++)
+                {
+                    if(cells[x, checkY].Tile != null)
+                    {
+                        yAbove = checkY;
+                        break;
+                    }
+                }
+
+                if(yAbove == -1) continue;
+
+                cells[x,y].Tile =  cells[x , yAbove].Tile;
+                cells[x, yAbove].Tile = null;
+
+                moved = true;
+            }
+        }
+    }
+    while(moved);
+}
 private void DestroyMatch()
 {
     List<Cell> matchedCells = matchChecker.FindAllMatch();
