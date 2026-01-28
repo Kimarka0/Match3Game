@@ -83,6 +83,33 @@ public class TileAnimator : MonoBehaviour
             Vector3 start = startScales[tile];
             tile.transform.localScale = start * popMultiplier;
         }
+
+        elapsed = 0f;
+        while(elapsed < deleteShrinkDuration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed/deleteShrinkDuration;
+            
+            for(int i = 0; i < aliveTiles.Count; i++)
+            {
+                Tile tile = aliveTiles[i];
+                if(tile == null) continue;
+                Vector3 start = startScales[tile];
+                Vector3 end = Vector3.zero;
+                tile.transform.localScale = Vector3.Lerp(start, end, t);
+            }
+            yield return null;
+        }
+
+        for(int i = 0; i < aliveTiles.Count; i++)
+        {
+            Tile tile = aliveTiles[i];
+            if(tile == null) continue;
+            tile.transform.localScale = Vector3.zero;
+        }
+        
+        isAnimating = false;
+        onComplete?.Invoke();
     }
 
     private IEnumerator SwapCoroutine(Tile firstTile, Vector3 firstTarget, Tile secondTile, Vector3 secondTarget, System.Action onComplete)

@@ -6,13 +6,14 @@ public class Board : MonoBehaviour
 {
     [SerializeField] private int width = 8;
     [SerializeField] private int height = 8;
+    [SerializeField] private TileAnimator tileAnimator;
     [SerializeField] private Tile tilePrefab;
     [SerializeField] private float cellSize = 1.2f;
     [SerializeField] private Transform tilesRoot;
     private Cell[,] cells;
     private MatchChecker matchChecker;
     private BoardView boardView;
-    [SerializeField] private TileAnimator tileAnimator;
+    private bool isBusy = false;
 
     private void Start()
     {
@@ -33,6 +34,7 @@ public class Board : MonoBehaviour
 
             if (hasMatch)
             {
+                DestroyMatch();
                 return;
             }
             
@@ -167,14 +169,37 @@ private void SwapTiles(Cell a, Cell b)
         SwapTiles(a, b);
         return false;
     }
- private void DestroyMatch()
+private void DestroyMatch()
 {
-    List<Cell> cells = new();  
-    cells = matchChecker.FindAllMatch();
-    for(int i = 0; i < cells.Count; i++)
+    List<Cell> matchedCells = matchChecker.FindAllMatch();
+    List<Tile> matchedTiles = new();
+    for(int i = 0; i < matchedCells.Count; i++)
     {
-        cells[i].Tile.TileDestroy();
+        Cell matchedCell = matchedCells[i];
+        if(matchedCell.Tile == null) continue;
+        matchedTiles.Add(matchedCell.Tile);
     }
+
+    if(matchedTiles.Count == 0) return;
+
+    if(isBusy) return;
+
+    isBusy = true;
+
+    tileAnimator.PlayDelete(matchedTiles, () =>
+    {
+        for(int i = 0;i < matchedCells.Count; i++)
+        {
+            Cell cell = matchedCells[i];
+            if(cell.Tile == null) continue;
+            Destroy(cell.Tile.gameObject);
+            cell.Tile = null;
+        }
+
+        isBusy = false;
+    });
+
+    
 }
 
 }

@@ -194,54 +194,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 33224030}
   m_CullTransparentMesh: 1
---- !u!1 &209113246
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 209113248}
-  - component: {fileID: 209113247}
-  m_Layer: 0
-  m_Name: TileAnimator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &209113247
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 209113246}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cfe53e1364e9891428852dbee5252695, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::TileAnimator
-  swapDuration: 0.25
-  deletePopDuration: 0.1
-  deleteShrinkDuration: 0.15
-  popMultiplier: 1.2
---- !u!4 &209113248
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 209113246}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &222405609
 GameObject:
   m_ObjectHideFlags: 0
@@ -798,7 +750,7 @@ MonoBehaviour:
   tilePrefab: {fileID: -1685099900112673118, guid: ecfc30707779d2d4d9a7e83295bd772b, type: 3}
   cellSize: 2
   tilesRoot: {fileID: 352990832}
-  tileAnimator: {fileID: 209113247}
+  tileAnimator: {fileID: 1900996992}
 --- !u!1 &1116336822
 GameObject:
   m_ObjectHideFlags: 0
@@ -1258,13 +1210,61 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1774495445}
   m_CullTransparentMesh: 1
+--- !u!1 &1900996991
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1900996993}
+  - component: {fileID: 1900996992}
+  m_Layer: 0
+  m_Name: TileAnimator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1900996992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900996991}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfe53e1364e9891428852dbee5252695, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileAnimator
+  swapDuration: 0.25
+  deletePopDuration: 0.1
+  deleteShrinkDuration: 0.15
+  popMultiplier: 1.2
+--- !u!4 &1900996993
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1900996991}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 519420032}
   - {fileID: 619394802}
-  - {fileID: 209113248}
+  - {fileID: 1900996993}
   - {fileID: 779525991}
   - {fileID: 463422156}
   - {fileID: 1640490903}
