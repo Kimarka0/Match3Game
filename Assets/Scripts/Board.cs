@@ -11,16 +11,46 @@ public class Board : MonoBehaviour
     [SerializeField] private Transform tilesRoot;
     private Cell[,] cells;
     private MatchChecker matchChecker;
+    private BoardView boardView;
+    [SerializeField] private TileAnimator tileAnimator;
 
     private void Start()
     {
         CreateBoard();
+
+        Cell firstCell = cells[0,0];
+        Cell secondCell = cells[0,1];
+
+        Vector3 firstTarget = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
+        Vector3 secondTarget = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
+
+        SwapTiles(firstCell, secondCell);
+
+        tileAnimator.PlaySwap(firstCell.Tile, firstTarget, secondCell.Tile, secondTarget, 
+        onComplete: () =>
+        {
+            bool hasMatch = matchChecker.HasMatchAt(firstCell.X, firstCell.Y) || matchChecker.HasMatchAt(secondCell.X, secondCell.Y);
+
+            if (hasMatch)
+            {
+                return;
+            }
+            
+            SwapTiles(firstCell,secondCell);
+
+            Vector3 firstTargetBack = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
+            Vector3 secondTargetBack = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
+
+            tileAnimator.PlaySwap(firstCell.Tile, firstTargetBack, secondCell.Tile, secondTargetBack);
+        });
+
     }
 
     private void CreateBoard()
     {
         cells = new Cell[width, height];
 
+        boardView = new(width, height, cellSize);
 
         for(int x = 0; x < width; x++)
         {
@@ -40,14 +70,11 @@ public class Board : MonoBehaviour
     {
         Tile tile = Instantiate(tilePrefab, tilesRoot);
 
-        float offsetX = (width - 1)  * cellSize / 2f;
-        float offsetY = (height -1 ) * cellSize / 2f;
-        tile.transform.position = new Vector3((cell.X * cellSize) - offsetX, (cell.Y * cellSize) - offsetY, 0);
-
         TileType randomType = GetValidRandomTileType(cell.X, cell.Y);
         tile.Init(randomType);
 
         cell.Tile = tile;
+        boardView.UpdateTilePosition(cell);
         Debug.Log($"Tile placed at: {cell.X},{cell.Y} type={randomType}");
         
     }
@@ -105,6 +132,41 @@ private bool IsTileTypeValid(int x,int y, TileType type)
         return true;
 }
 
+
+private bool CheckNeighbours(Cell firstCell, Cell secondsCell)
+{
+   if(firstCell.X == secondsCell.X && Mathf.Abs(secondsCell.Y - firstCell.Y) == 1) return true;
+   if(firstCell.Y == secondsCell.Y && Mathf.Abs(secondsCell.X - firstCell.X) == 1) return true;
+
+   return false;
+}
+
+private void SwapTiles(Cell a, Cell b)
+    {
+        Tile temp = a.Tile;
+        a.Tile = b.Tile;
+        b.Tile = temp;
+
+        boardView.UpdateTilePositions(a, b);
+    }
+
+    private bool TrySwapCells(Cell a, Cell b)
+    {
+        if (!CheckNeighbours(a, b))
+            return false;
+
+        SwapTiles(a, b);
+
+        bool hasMatch =
+            matchChecker.HasMatchAt(a.X, a.Y) ||
+            matchChecker.HasMatchAt(b.X, b.Y);
+
+        if (hasMatch)
+            return true;
+
+        SwapTiles(a, b);
+        return false;
+    }
  private void DestroyMatch()
 {
     List<Cell> cells = new();  
@@ -113,14 +175,6 @@ private bool IsTileTypeValid(int x,int y, TileType type)
     {
         cells[i].Tile.TileDestroy();
     }
-}
-
-private bool CheckNeighbours(Cell firstCell, Cell secondsCell)
-{
-   if(firstCell.X == secondsCell.X && Mathf.Abs(secondsCell.Y - firstCell.Y) == 1) return true;
-   if(firstCell.Y == secondsCell.Y && Mathf.Abs(secondsCell.X - firstCell.X) == 1) return true;
-
-   return false;
 }
 
 }
