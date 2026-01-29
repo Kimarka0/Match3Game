@@ -1,201 +1,191 @@
 using System.Collections;
 using System.Collections.Generic;
-using NUnit.Framework;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class Board : MonoBehaviour
 {
+    [Header("Board Size")]
     [SerializeField] private int width = 8;
     [SerializeField] private int height = 8;
-    [SerializeField] private TileAnimator tileAnimator;
-    [SerializeField] private Tile tilePrefab;
     [SerializeField] private float cellSize = 1.2f;
+
+    [Header("Prefabs & Scene References")]
+    [SerializeField] private Tile tilePrefab;
     [SerializeField] private Transform tilesRoot;
+    [SerializeField] private TileAnimator tileAnimator;
+
+    // Runtime
     private Cell[,] cells;
     private MatchChecker matchChecker;
     private BoardView boardView;
-    private bool isBusy = false;
+    private bool isBusy;
 
     public bool IsBusy => isBusy;
 
-    public void TrySwapWithDirection(Tile tile, Vector2Int direction)
-    {
-        Debug.Log("TrySwapWithDirection called");
-
-        if(isBusy) return;
-        if(tile == null) return;
-
-
-        Cell fromCell = FindCellByTile(tile);
-        if(fromCell == null) return;
-
-        int targetX = fromCell.X + direction.x;
-        int targetY = fromCell.Y + direction.y;
-
-        if(targetX < 0 || targetX >= width || targetY < 0 || targetY >= height) return;
-
-        Cell targetCell = cells[targetX, targetY];
-
-        bool success = TrySwapCells(fromCell, targetCell);
-        if (success)
-        {
-            ResolveBoard();
-        }
-    }
     private void Start()
     {
         CreateBoard();
-
-        // Cell firstCell = cells[0,0];
-        // Cell secondCell = cells[0,1];
-
-        // Vector3 firstTarget = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
-        // Vector3 secondTarget = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
-
-        // SwapTiles(firstCell, secondCell);
-
-        // tileAnimator.PlaySwap(firstCell.Tile, firstTarget, secondCell.Tile, secondTarget, 
-        // onComplete: () =>
-        // {
-        //     bool hasMatch = matchChecker.HasMatchAt(firstCell.X, firstCell.Y) || matchChecker.HasMatchAt(secondCell.X, secondCell.Y);
-
-        //     if (hasMatch)
-        //     {
-        //         DestroyMatch();
-        //         return;
-        //     }
-            
-        //     SwapTiles(firstCell,secondCell);
-
-        //     Vector3 firstTargetBack = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
-        //     Vector3 secondTargetBack = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
-
-        //     tileAnimator.PlaySwap(firstCell.Tile, firstTargetBack, secondCell.Tile, secondTargetBack);
-        // });
-
     }
+
+    // ============================================================
+    // Public API
+    // ============================================================
+
+    public void TrySwapWithDirection(Tile tile, Vector2Int direction)
+    {
+        if (isBusy) return;
+        if (tile == null) return;
+
+        Cell firstCell = FindCellByTile(tile);
+        if (firstCell == null) return;
+
+        int secondX = firstCell.X + direction.x;
+        int secondY = firstCell.Y + direction.y;
+
+        if (!IsInsideBoard(secondX, secondY)) return;
+
+        Cell secondCell = cells[secondX, secondY];
+        if (!AreNeighbours(firstCell, secondCell)) return;
+
+        StartCoroutine(TrySwapRoutine(firstCell, secondCell));
+    }
+
+    // ============================================================
+    // Board Setup
+    // ============================================================
 
     private void CreateBoard()
     {
         cells = new Cell[width, height];
+        boardView = new BoardView(width, height, cellSize);
 
-        boardView = new(width, height, cellSize);
-
-        for(int x = 0; x < width; x++)
+        for (int x = 0; x < width; x++)
         {
-            for(int y = 0; y < height; y++)
+            for (int y = 0; y < height; y++)
             {
                 Cell cell = new Cell(x, y);
-                cells[x,y] = cell;
+                cells[x, y] = cell;
 
-                CreateTile(cell);
-                Debug.Log($"Cell created: {x},{y}");
+                CreateTileForCell(cell);
             }
         }
+
         matchChecker = new MatchChecker(cells, width, height);
     }
 
-    private void CreateTile(Cell cell)
+    private void CreateTileForCell(Cell cell)
     {
         Tile tile = Instantiate(tilePrefab, tilesRoot);
 
-        TileType randomType = GetValidRandomTileType(cell.X, cell.Y);
-        tile.Init(randomType, this);
+        TileType type = GetValidRandomTileType(cell.X, cell.Y);
+        tile.Init(type, this);
 
         cell.Tile = tile;
         boardView.UpdateTilePosition(cell);
-        Debug.Log($"Tile placed at: {cell.X},{cell.Y} type={randomType}");
-        
     }
 
-    private Cell GetCell(int x, int y)
-    {
-        return cells[x,y];
-    }
+    // ============================================================
+    // Swap Flow
+    // ============================================================
 
-    private TileType GetTileType(int x, int y)
+    private IEnumerator TrySwapRoutine(Cell firstCell, Cell secondCell)
     {
-        return cells[x, y].Tile.Type;;
-    }
+        isBusy = true;
 
-    private TileType GetValidRandomTileType(int x, int y)
-    {
-        TileType type;
+        Tile firstTile = firstCell.Tile;
+        Tile secondTile = secondCell.Tile;
 
-        do
+        if (firstTile == null || secondTile == null)
         {
-            type = (TileType)Random.Range(0, System.Enum.GetValues(typeof(TileType)).Length);
-        }
-        while(!IsTileTypeValid(x, y, type));
-
-        return type;
-            
-    }
-
-
-    private bool IsTileTypeValid(int x,int y, TileType type)
-    {
-        if(x >= 2)
-            {
-                Tile  leftNeighbor = cells[x - 1, y].Tile;
-                Tile leftFarNeighbor = cells[x - 2, y].Tile;
-
-                if(leftNeighbor != null && leftFarNeighbor != null &&
-                    leftNeighbor.Type == type && leftFarNeighbor.Type == type)
-                {
-                    return false;
-                }
-            }  
-
-            if(y >= 2)
-            {
-                Tile bottomNeighbor = cells[x, y - 1].Tile;
-                Tile bottomFarNeighbor = cells[x, y - 2].Tile;
-
-                if(bottomNeighbor != null && bottomFarNeighbor != null
-                    && bottomNeighbor.Type == type && bottomFarNeighbor.Type == type)
-                {
-                    return false;
-                }
-            }
-            return true;
-    }
-
-
-    private bool CheckNeighbours(Cell firstCell, Cell secondsCell)
-    {
-    if(firstCell.X == secondsCell.X && Mathf.Abs(secondsCell.Y - firstCell.Y) == 1) return true;
-    if(firstCell.Y == secondsCell.Y && Mathf.Abs(secondsCell.X - firstCell.X) == 1) return true;
-
-    return false;
-    }
-
-    private void SwapTiles(Cell a, Cell b)
-        {
-            Tile temp = a.Tile;
-            a.Tile = b.Tile;
-            b.Tile = temp;
-
-            boardView.UpdateTilePositions(a, b);
+            isBusy = false;
+            yield break;
         }
 
-    private bool TrySwapCells(Cell a, Cell b)
-    {
-        if (!CheckNeighbours(a, b))
-            return false;
+        // 1) animate swap
+        Vector3 firstTarget = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
+        Vector3 secondTarget = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
 
-        SwapTiles(a, b);
+        yield return PlaySwapAndWait(firstTile, firstTarget, secondTile, secondTarget);
 
+        // 2) swap model data
+        SwapTilesDataOnly(firstCell, secondCell);
+
+        // 3) match check
         bool hasMatch =
-            matchChecker.HasMatchAt(a.X, a.Y) ||
-            matchChecker.HasMatchAt(b.X, b.Y);
+            matchChecker.HasMatchAt(firstCell.X, firstCell.Y) ||
+            matchChecker.HasMatchAt(secondCell.X, secondCell.Y);
 
-        if (hasMatch)
-            return true;
+        if (!hasMatch)
+        {
+            // 4) animate back
+            Vector3 firstBack = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
+            Vector3 secondBack = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
 
-        SwapTiles(a, b);
-        return false;
+            yield return PlaySwapAndWait(firstTile, firstBack, secondTile, secondBack);
+
+            // 5) revert data
+            SwapTilesDataOnly(firstCell, secondCell);
+
+            isBusy = false;
+            yield break;
+        }
+
+        // 6) resolve cascades
+        yield return ResolveBoardRoutine();
+
+        isBusy = false;
+    }
+
+    private IEnumerator PlaySwapAndWait(Tile firstTile, Vector3 firstTarget, Tile secondTile, Vector3 secondTarget)
+    {
+        bool finished = false;
+        tileAnimator.PlaySwap(firstTile, firstTarget, secondTile, secondTarget, () => finished = true);
+        while (!finished) yield return null;
+    }
+
+    // ============================================================
+    // Resolve / Matches / Gravity
+    // ============================================================
+
+    private IEnumerator ResolveBoardRoutine()
+    {
+        while (true)
+        {
+            List<Cell> matchedCells = matchChecker.FindAllMatch();
+            if (matchedCells.Count == 0) yield break;
+
+            yield return AnimateAndClearMatchesRoutine(matchedCells);
+
+            ApplyGravity();
+            SpawnNewTiles();
+
+            yield return AnimateAllTilesToCellPositionsRoutine();
+        }
+    }
+
+    private IEnumerator AnimateAndClearMatchesRoutine(List<Cell> matchedCells)
+    {
+        // Collect tiles to animate delete
+        List<Tile> matchedTiles = new List<Tile>(matchedCells.Count);
+        for (int i = 0; i < matchedCells.Count; i++)
+        {
+            Tile tile = matchedCells[i].Tile;
+            if (tile != null) matchedTiles.Add(tile);
+        }
+
+        bool finished = false;
+        tileAnimator.PlayDelete(matchedTiles, () => finished = true);
+        while (!finished) yield return null;
+
+        // Destroy and clear cells
+        for (int i = 0; i < matchedCells.Count; i++)
+        {
+            Cell cell = matchedCells[i];
+            if (cell.Tile == null) continue;
+
+            Destroy(cell.Tile.gameObject);
+            cell.Tile = null;
+        }
     }
 
     private void ApplyGravity()
@@ -204,161 +194,171 @@ public class Board : MonoBehaviour
         do
         {
             moved = false;
-            for(int x = 0; x < width; x++)
-            {
-                for(int y = 0; y < height - 1; y++)
-                {
-                    if(cells[x,y].Tile != null) continue;
-                    
-                    int yAbove  = -1;
 
-                    for(int checkY = y + 1; checkY < height; checkY++)
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height - 1; y++)
+                {
+                    if (cells[x, y].Tile != null) continue;
+
+                    int yAbove = -1;
+                    for (int checkY = y + 1; checkY < height; checkY++)
                     {
-                        if(cells[x, checkY].Tile != null)
+                        if (cells[x, checkY].Tile != null)
                         {
                             yAbove = checkY;
                             break;
                         }
                     }
 
-                    if(yAbove == -1) continue;
+                    if (yAbove == -1) continue;
 
-                    cells[x,y].Tile =  cells[x , yAbove].Tile;
+                    cells[x, y].Tile = cells[x, yAbove].Tile;
                     cells[x, yAbove].Tile = null;
 
                     moved = true;
                 }
             }
         }
-        while(moved);
+        while (moved);
     }
 
     private void SpawnNewTiles()
     {
-        for(int x = 0; x < width; x++)
+        float spawnYOffset = cellSize * 2f;
+
+        for (int x = 0; x < width; x++)
         {
-            for(int y = 0; y < height; y++)
+            for (int y = 0; y < height; y++)
             {
-                if(cells[x, y].Tile != null) continue;
+                if (cells[x, y].Tile != null) continue;
 
                 Tile tile = Instantiate(tilePrefab, tilesRoot);
 
                 TileType type = GetValidRandomTileType(x, y);
                 tile.Init(type, this);
 
+                Vector3 topPos = boardView.GetWorldPosition(x, height - 1);
+                tile.transform.position = new Vector3(topPos.x, topPos.y + spawnYOffset, 0f);
+
                 cells[x, y].Tile = tile;
-                boardView.UpdateTilePosition(cells[x, y]);
             }
         }
     }
 
-    private void ResolveBoard()
+    private IEnumerator AnimateAllTilesToCellPositionsRoutine(float duration = 0.18f)
     {
-        if(isBusy) return;
-        StartCoroutine(ResolveBoardCoroutine());
-    }
+        List<Tile> tiles = new List<Tile>();
+        List<Vector3> starts = new List<Vector3>();
+        List<Vector3> targets = new List<Vector3>();
 
-    private IEnumerator ResolveBoardCoroutine()
-    {
-        isBusy = true;
-
-        while (true)
+        for (int x = 0; x < width; x++)
         {
-            List<Cell> matchedCells = matchChecker.FindAllMatch();
-            if(matchedCells.Count == 0) break;
-
-            yield return StartCoroutine(AnimateAndDestroyMatches(matchedCells));
-
-            ApplyGravity();
-            SpawnNewTiles();
-            UpdateAllTilePositions();
-        }
-        isBusy = false;
-    }
-
-    private IEnumerator AnimateAndDestroyMatches(List<Cell> matchedCells)
-    {
-        List<Tile> matchedTiles = new();
-        for(int i = 0; i < matchedCells.Count; i++)
-        {
-            Tile tile = matchedCells[i].Tile;
-            if(tile != null)
+            for (int y = 0; y < height; y++)
             {
-                matchedTiles.Add(tile);
+                Tile tile = cells[x, y].Tile;
+                if (tile == null) continue;
+
+                tiles.Add(tile);
+                starts.Add(tile.transform.position);
+                targets.Add(boardView.GetWorldPosition(x, y));
             }
         }
-            bool finished = false;
 
-            tileAnimator.PlayDelete(matchedTiles, () => finished = true);
-
-            while(!finished) yield return null;
-
-            for(int i = 0; i < matchedCells.Count; i++)
+        float elapsed = 0f;
+        while (elapsed < duration)
         {
-            Cell cell = matchedCells[i];
-            if(cell.Tile == null) continue;
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
 
-            Destroy(cell.Tile.gameObject);
-            cell.Tile = null;
+            for (int i = 0; i < tiles.Count; i++)
+            {
+                Tile tile = tiles[i];
+                if (tile == null) continue;
+
+                tile.transform.position = Vector3.Lerp(starts[i], targets[i], t);
+            }
+
+            yield return null;
         }
-        
+
+        for (int i = 0; i < tiles.Count; i++)
+        {
+            Tile tile = tiles[i];
+            if (tile == null) continue;
+
+            tile.transform.position = targets[i];
+        }
     }
 
-    private void UpdateAllTilePositions()
+    // ============================================================
+    // Helpers
+    // ============================================================
+
+    private bool IsInsideBoard(int x, int y)
     {
-        for(int x = 0; x < width; x++)
-        {
-            for(int y = 0; y < height; y++)
-            {
-                boardView.UpdateTilePosition(cells[x, y]);
-            }
-        }
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
+    private bool AreNeighbours(Cell firstCell, Cell secondCell)
+    {
+        if (firstCell.X == secondCell.X && Mathf.Abs(secondCell.Y - firstCell.Y) == 1) return true;
+        if (firstCell.Y == secondCell.Y && Mathf.Abs(secondCell.X - firstCell.X) == 1) return true;
+        return false;
+    }
+
+    private void SwapTilesDataOnly(Cell firstCell, Cell secondCell)
+    {
+        Tile temp = firstCell.Tile;
+        firstCell.Tile = secondCell.Tile;
+        secondCell.Tile = temp;
     }
 
     private Cell FindCellByTile(Tile tile)
     {
-        for(int x = 0; x < width; x++)
+        for (int x = 0; x < width; x++)
         {
-            for(int y = 0; y < height; y++)
+            for (int y = 0; y < height; y++)
             {
-                if(cells[x, y].Tile == tile) return cells[x, y];
-
+                if (cells[x, y].Tile == tile) return cells[x, y];
             }
         }
+
         return null;
     }
 
-    private void DestroyMatch()
+    private TileType GetValidRandomTileType(int x, int y)
     {
-        List<Cell> matchedCells = matchChecker.FindAllMatch();
-        List<Tile> matchedTiles = new();
-        for(int i = 0; i < matchedCells.Count; i++)
+        TileType type;
+        do
         {
-            Cell matchedCell = matchedCells[i];
-            if(matchedCell.Tile == null) continue;
-            matchedTiles.Add(matchedCell.Tile);
+            type = (TileType)Random.Range(0, System.Enum.GetValues(typeof(TileType)).Length);
         }
+        while (!IsTileTypeValid(x, y, type));
 
-        if(matchedTiles.Count == 0) return;
-
-        if(isBusy) return;
-
-        isBusy = true;
-
-        tileAnimator.PlayDelete(matchedTiles, () =>
-        {
-            for(int i = 0;i < matchedCells.Count; i++)
-            {
-                Cell cell = matchedCells[i];
-                if(cell.Tile == null) continue;
-                Destroy(cell.Tile.gameObject);
-                cell.Tile = null;
-            }
-
-            isBusy = false;
-        });
-
-        
+        return type;
     }
 
+    private bool IsTileTypeValid(int x, int y, TileType type)
+    {
+        if (x >= 2)
+        {
+            Tile left = cells[x - 1, y].Tile;
+            Tile leftFar = cells[x - 2, y].Tile;
+
+            if (left != null && leftFar != null && left.Type == type && leftFar.Type == type)
+                return false;
+        }
+
+        if (y >= 2)
+        {
+            Tile bottom = cells[x, y - 1].Tile;
+            Tile bottomFar = cells[x, y - 2].Tile;
+
+            if (bottom != null && bottomFar != null && bottom.Type == type && bottomFar.Type == type)
+                return false;
+        }
+
+        return true;
+    }
 }

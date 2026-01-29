@@ -18,23 +18,31 @@ public class TileAnimator : MonoBehaviour
     }
     public void PlaySwap(Tile firstTile, Vector3 firstTarget, Tile secondTile, Vector3 secondTarget, System.Action onComplete)
     {
-
-        if(isAnimating) return;
-
-        StartCoroutine(SwapCoroutine(firstTile, firstTarget, secondTile, secondTarget, onComplete));
-    }
-
-    public void PlayDelete(List<Tile> tiles, System.Action onComplete)
-    {
-        if(isAnimating) return;
-        if(tiles == null || tiles.Count == 0)
+        if (isAnimating)
         {
             onComplete?.Invoke();
             return;
-        } 
+        }
+        StartCoroutine(SwapCoroutine(firstTile, firstTarget, secondTile, secondTarget, onComplete));
+    }
+
+
+    public void PlayDelete(List<Tile> tiles, System.Action onComplete)
+    {
+        if (isAnimating)
+        {
+            onComplete?.Invoke();
+            return;
+        }
+        if (tiles == null || tiles.Count == 0)
+        {
+            onComplete?.Invoke();
+            return;
+        }
 
         StartCoroutine(DeleteCoroutine(tiles, onComplete));
     }
+
 
     private IEnumerator DeleteCoroutine(List<Tile> tiles, System.Action onComplete)
     {
