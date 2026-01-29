@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using NUnit.Framework;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -19,32 +21,32 @@ public class Board : MonoBehaviour
     {
         CreateBoard();
 
-        Cell firstCell = cells[0,0];
-        Cell secondCell = cells[0,1];
+        // Cell firstCell = cells[0,0];
+        // Cell secondCell = cells[0,1];
 
-        Vector3 firstTarget = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
-        Vector3 secondTarget = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
+        // Vector3 firstTarget = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
+        // Vector3 secondTarget = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
 
-        SwapTiles(firstCell, secondCell);
+        // SwapTiles(firstCell, secondCell);
 
-        tileAnimator.PlaySwap(firstCell.Tile, firstTarget, secondCell.Tile, secondTarget, 
-        onComplete: () =>
-        {
-            bool hasMatch = matchChecker.HasMatchAt(firstCell.X, firstCell.Y) || matchChecker.HasMatchAt(secondCell.X, secondCell.Y);
+        // tileAnimator.PlaySwap(firstCell.Tile, firstTarget, secondCell.Tile, secondTarget, 
+        // onComplete: () =>
+        // {
+        //     bool hasMatch = matchChecker.HasMatchAt(firstCell.X, firstCell.Y) || matchChecker.HasMatchAt(secondCell.X, secondCell.Y);
 
-            if (hasMatch)
-            {
-                DestroyMatch();
-                return;
-            }
+        //     if (hasMatch)
+        //     {
+        //         DestroyMatch();
+        //         return;
+        //     }
             
-            SwapTiles(firstCell,secondCell);
+        //     SwapTiles(firstCell,secondCell);
 
-            Vector3 firstTargetBack = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
-            Vector3 secondTargetBack = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
+        //     Vector3 firstTargetBack = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
+        //     Vector3 secondTargetBack = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
 
-            tileAnimator.PlaySwap(firstCell.Tile, firstTargetBack, secondCell.Tile, secondTargetBack);
-        });
+        //     tileAnimator.PlaySwap(firstCell.Tile, firstTargetBack, secondCell.Tile, secondTargetBack);
+        // });
 
     }
 
@@ -73,7 +75,7 @@ public class Board : MonoBehaviour
         Tile tile = Instantiate(tilePrefab, tilesRoot);
 
         TileType randomType = GetValidRandomTileType(cell.X, cell.Y);
-        tile.Init(randomType);
+        tile.Init(randomType, this);
 
         cell.Tile = tile;
         boardView.UpdateTilePosition(cell);
@@ -106,51 +108,51 @@ public class Board : MonoBehaviour
     }
 
 
-private bool IsTileTypeValid(int x,int y, TileType type)
-{
-      if(x >= 2)
-        {
-            Tile  leftNeighbor = cells[x - 1, y].Tile;
-            Tile leftFarNeighbor = cells[x - 2, y].Tile;
-
-            if(leftNeighbor != null && leftFarNeighbor != null &&
-                leftNeighbor.Type == type && leftFarNeighbor.Type == type)
-            {
-                return false;
-            }
-        }  
-
-        if(y >= 2)
-        {
-            Tile bottomNeighbor = cells[x, y - 1].Tile;
-            Tile bottomFarNeighbor = cells[x, y - 2].Tile;
-
-            if(bottomNeighbor != null && bottomFarNeighbor != null
-                && bottomNeighbor.Type == type && bottomFarNeighbor.Type == type)
-            {
-                return false;
-            }
-        }
-        return true;
-}
-
-
-private bool CheckNeighbours(Cell firstCell, Cell secondsCell)
-{
-   if(firstCell.X == secondsCell.X && Mathf.Abs(secondsCell.Y - firstCell.Y) == 1) return true;
-   if(firstCell.Y == secondsCell.Y && Mathf.Abs(secondsCell.X - firstCell.X) == 1) return true;
-
-   return false;
-}
-
-private void SwapTiles(Cell a, Cell b)
+    private bool IsTileTypeValid(int x,int y, TileType type)
     {
-        Tile temp = a.Tile;
-        a.Tile = b.Tile;
-        b.Tile = temp;
+        if(x >= 2)
+            {
+                Tile  leftNeighbor = cells[x - 1, y].Tile;
+                Tile leftFarNeighbor = cells[x - 2, y].Tile;
 
-        boardView.UpdateTilePositions(a, b);
+                if(leftNeighbor != null && leftFarNeighbor != null &&
+                    leftNeighbor.Type == type && leftFarNeighbor.Type == type)
+                {
+                    return false;
+                }
+            }  
+
+            if(y >= 2)
+            {
+                Tile bottomNeighbor = cells[x, y - 1].Tile;
+                Tile bottomFarNeighbor = cells[x, y - 2].Tile;
+
+                if(bottomNeighbor != null && bottomFarNeighbor != null
+                    && bottomNeighbor.Type == type && bottomFarNeighbor.Type == type)
+                {
+                    return false;
+                }
+            }
+            return true;
     }
+
+
+    private bool CheckNeighbours(Cell firstCell, Cell secondsCell)
+    {
+    if(firstCell.X == secondsCell.X && Mathf.Abs(secondsCell.Y - firstCell.Y) == 1) return true;
+    if(firstCell.Y == secondsCell.Y && Mathf.Abs(secondsCell.X - firstCell.X) == 1) return true;
+
+    return false;
+    }
+
+    private void SwapTiles(Cell a, Cell b)
+        {
+            Tile temp = a.Tile;
+            a.Tile = b.Tile;
+            b.Tile = temp;
+
+            boardView.UpdateTilePositions(a, b);
+        }
 
     private bool TrySwapCells(Cell a, Cell b)
     {
@@ -170,71 +172,153 @@ private void SwapTiles(Cell a, Cell b)
         return false;
     }
 
-private void ApplyGravity()
-{
-    bool moved;
-    do
+    private void ApplyGravity()
     {
-        moved = false;
+        bool moved;
+        do
+        {
+            moved = false;
+            for(int x = 0; x < width; x++)
+            {
+                for(int y = 0; y < height - 1; y++)
+                {
+                    if(cells[x,y].Tile != null) continue;
+                    
+                    int yAbove  = -1;
+
+                    for(int checkY = y + 1; checkY < height; checkY++)
+                    {
+                        if(cells[x, checkY].Tile != null)
+                        {
+                            yAbove = checkY;
+                            break;
+                        }
+                    }
+
+                    if(yAbove == -1) continue;
+
+                    cells[x,y].Tile =  cells[x , yAbove].Tile;
+                    cells[x, yAbove].Tile = null;
+
+                    moved = true;
+                }
+            }
+        }
+        while(moved);
+    }
+
+    private void SpawnNewTiles()
+    {
         for(int x = 0; x < width; x++)
         {
-            for(int y = 0; y < height - 1; y++)
+            for(int y = 0; y < height; y++)
             {
-                if(cells[x,y].Tile != null) continue;
-                
-                int yAbove  = -1;
+                if(cells[x, y].Tile != null) continue;
 
-                for(int checkY = y + 1; checkY < height; checkY++)
-                {
-                    if(cells[x, checkY].Tile != null)
-                    {
-                        yAbove = checkY;
-                        break;
-                    }
-                }
+                Tile tile = Instantiate(tilePrefab, tilesRoot);
 
-                if(yAbove == -1) continue;
+                TileType type = GetValidRandomTileType(x, y);
+                tile.Init(type, this);
 
-                cells[x,y].Tile =  cells[x , yAbove].Tile;
-                cells[x, yAbove].Tile = null;
-
-                moved = true;
+                cells[x, y].Tile = tile;
+                boardView.UpdateTilePosition(cells[x, y]);
             }
         }
     }
-    while(moved);
-}
-private void DestroyMatch()
-{
-    List<Cell> matchedCells = matchChecker.FindAllMatch();
-    List<Tile> matchedTiles = new();
-    for(int i = 0; i < matchedCells.Count; i++)
+
+    private void ResolveBoard()
     {
-        Cell matchedCell = matchedCells[i];
-        if(matchedCell.Tile == null) continue;
-        matchedTiles.Add(matchedCell.Tile);
+        if(isBusy) return;
+        StartCoroutine(ResolveBoardCoroutine());
     }
 
-    if(matchedTiles.Count == 0) return;
-
-    if(isBusy) return;
-
-    isBusy = true;
-
-    tileAnimator.PlayDelete(matchedTiles, () =>
+    private IEnumerator ResolveBoardCoroutine()
     {
-        for(int i = 0;i < matchedCells.Count; i++)
+        isBusy = true;
+
+        while (true)
+        {
+            List<Cell> matchedCells = matchChecker.FindAllMatch();
+            if(matchedCells.Count == 0) break;
+
+            yield return StartCoroutine(AnimateAndDestroyMatches(matchedCells));
+
+            ApplyGravity();
+            SpawnNewTiles();
+            UpdateAllTilePositions();
+        }
+        isBusy = false;
+    }
+
+    private IEnumerator AnimateAndDestroyMatches(List<Cell> matchedCells)
+    {
+        List<Tile> matchedTiles = new();
+        for(int i = 0; i < matchedCells.Count; i++)
+        {
+            Tile tile = matchedCells[i].Tile;
+            if(tile != null)
+            {
+                matchedTiles.Add(tile);
+            }
+        }
+            bool finished = false;
+
+            tileAnimator.PlayDelete(matchedTiles, () => finished = true);
+
+            while(!finished) yield return null;
+
+            for(int i = 0; i < matchedCells.Count; i++)
         {
             Cell cell = matchedCells[i];
             if(cell.Tile == null) continue;
+
             Destroy(cell.Tile.gameObject);
             cell.Tile = null;
         }
+        
+    }
 
-        isBusy = false;
-    });
+    private void UpdateAllTilePositions()
+    {
+        for(int x = 0; x < width; x++)
+        {
+            for(int y = 0; y < height; y++)
+            {
+                boardView.UpdateTilePosition(cells[x, y]);
+            }
+        }
+    }
+    private void DestroyMatch()
+    {
+        List<Cell> matchedCells = matchChecker.FindAllMatch();
+        List<Tile> matchedTiles = new();
+        for(int i = 0; i < matchedCells.Count; i++)
+        {
+            Cell matchedCell = matchedCells[i];
+            if(matchedCell.Tile == null) continue;
+            matchedTiles.Add(matchedCell.Tile);
+        }
 
-    
-}
+        if(matchedTiles.Count == 0) return;
+
+        if(isBusy) return;
+
+        isBusy = true;
+
+        tileAnimator.PlayDelete(matchedTiles, () =>
+        {
+            for(int i = 0;i < matchedCells.Count; i++)
+            {
+                Cell cell = matchedCells[i];
+                if(cell.Tile == null) continue;
+                Destroy(cell.Tile.gameObject);
+                cell.Tile = null;
+            }
+
+            isBusy = false;
+        });
+
+        
+    }
 
 }

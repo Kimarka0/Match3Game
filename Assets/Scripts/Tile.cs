@@ -19,10 +19,17 @@ public class Tile : MonoBehaviour
         Y = y;
     }
 
-    public void Init(TileType type)
+    public void Init(TileType type, Board board)
     {
         Type = type;
+        this.board = board;
         spriteRenderer.sprite = sprites[(int)type];
+
+        TileInputUI input = GetComponent<TileInputUI>();
+        if(input != null)
+        {
+            input.Init(board, this);
+        }
     }
 
     public void TileDestroy()
