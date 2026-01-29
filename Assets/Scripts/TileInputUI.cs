@@ -14,14 +14,20 @@ public class TileInputUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
     }
     public void OnPointerDown(PointerEventData eventData)
     {
+        Debug.Log("POINTER DOWN ON TILE", this);
+        if(board == null) return;
+        if(board.IsBusy) return;
         startPointerPos = eventData.position;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        Debug.Log("POINTER UP ON TILE", this);
         Vector2 delta = eventData.position - startPointerPos;
+        Debug.Log($"Swipe delta: {delta}");
 
-        if(delta.magnitude < 50f) return;
+
+        if(delta.magnitude < 20f) return;
 
         Vector2Int direction;
 
@@ -33,6 +39,8 @@ public class TileInputUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         {
             direction = delta.y > 0 ? Vector2Int.up : Vector2Int.down;
         }
+        Debug.Log($"Swipe direction: {direction}");
+
     board.TrySwapWithDirection(tile, direction);
     }
 

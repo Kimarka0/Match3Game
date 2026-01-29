@@ -341,12 +341,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 352990831}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.000061035, y: 0, z: -4859.999}
-  m_LocalScale: {x: 54, y: 54, z: 54}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1116336823}
+  m_Father: {fileID: 779525991}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &426700746
 GameObject:
@@ -539,7 +539,6 @@ GameObject:
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
   - component: {fileID: 519420030}
-  - component: {fileID: 519420033}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -665,22 +664,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &519420033
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 519420028}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56666c5a40171f54783dd416a44f42bf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.EventSystems.Physics2DRaycaster
-  m_EventMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_MaxRayIntersections: 0
 --- !u!1 &619394800
 GameObject:
   m_ObjectHideFlags: 0
@@ -794,7 +777,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 352990832}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &779525992
@@ -812,7 +796,7 @@ MonoBehaviour:
   width: 8
   height: 8
   tileAnimator: {fileID: 209113247}
-  tilePrefab: {fileID: -6799933209872374610, guid: 994dacfc19bbbfa4d9250f4ee8a47712, type: 3}
+  tilePrefab: {fileID: -1685099900112673118, guid: ecfc30707779d2d4d9a7e83295bd772b, type: 3}
   cellSize: 2
   tilesRoot: {fileID: 352990832}
 --- !u!1 &1116336822
@@ -847,7 +831,6 @@ RectTransform:
   m_Children:
   - {fileID: 1257919511}
   - {fileID: 1368852774}
-  - {fileID: 352990832}
   m_Father: {fileID: 463422156}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -869,13 +852,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 4723615604949782903, guid: 1b1e7fe7efe759949989da1ba4c457cd, type: 3}
+  m_Sprite: {fileID: 8200657730350370009, guid: a88a52d2e5184a144914d47b15cd5ae5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1080,8 +1063,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -2.6500244, y: 0}
-  m_SizeDelta: {x: -1055.24, y: -212.79}
+  m_AnchoredPosition: {x: 28.76001, y: 14}
+  m_SizeDelta: {x: -19.94, y: 283.9}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1368852775
 MonoBehaviour:
@@ -1097,13 +1080,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Image
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 0
+  m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 8489265320968952735, guid: 7ca0c4add92da80488b115fa06217d03, type: 3}
+  m_Sprite: {fileID: 8806508055430998920, guid: 93ea2598389a2e5498035e4f9f7b1d12, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1

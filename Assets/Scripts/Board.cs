@@ -17,6 +17,32 @@ public class Board : MonoBehaviour
     private BoardView boardView;
     private bool isBusy = false;
 
+    public bool IsBusy => isBusy;
+
+    public void TrySwapWithDirection(Tile tile, Vector2Int direction)
+    {
+        Debug.Log("TrySwapWithDirection called");
+
+        if(isBusy) return;
+        if(tile == null) return;
+
+
+        Cell fromCell = FindCellByTile(tile);
+        if(fromCell == null) return;
+
+        int targetX = fromCell.X + direction.x;
+        int targetY = fromCell.Y + direction.y;
+
+        if(targetX < 0 || targetX >= width || targetY < 0 || targetY >= height) return;
+
+        Cell targetCell = cells[targetX, targetY];
+
+        bool success = TrySwapCells(fromCell, targetCell);
+        if (success)
+        {
+            ResolveBoard();
+        }
+    }
     private void Start()
     {
         CreateBoard();
@@ -288,6 +314,20 @@ public class Board : MonoBehaviour
             }
         }
     }
+
+    private Cell FindCellByTile(Tile tile)
+    {
+        for(int x = 0; x < width; x++)
+        {
+            for(int y = 0; y < height; y++)
+            {
+                if(cells[x, y].Tile == tile) return cells[x, y];
+
+            }
+        }
+        return null;
+    }
+
     private void DestroyMatch()
     {
         List<Cell> matchedCells = matchChecker.FindAllMatch();
