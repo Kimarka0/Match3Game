@@ -1,10 +1,16 @@
 fileFormatVersion: 2
-guid: 31db4dc379aef16499212893a222d18c
+guid: cf9a3bd749acb1d4395527464bcc2d2e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6967565224267173622
-    second: 2c261452-41c7-4d7c-ab4d-b30def42585a_0
+      213: -2477469653972144327
+    second: "ChatGPT Image 30 \u044F\u043D\u0432. 2026 \u0433., 14_05_11_0"
+  - first:
+      213: 5652629602770178812
+    second: "ChatGPT Image 30 \u044F\u043D\u0432. 2026 \u0433., 14_05_11_1"
+  - first:
+      213: -7398215853015803611
+    second: "ChatGPT Image 30 \u044F\u043D\u0432. 2026 \u0433., 14_05_11_2"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +43,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -113,23 +119,67 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 2c261452-41c7-4d7c-ab4d-b30def42585a_0
+      name: "ChatGPT Image 30 \u044F\u043D\u0432. 2026 \u0433., 14_05_11_0"
       rect:
         serializedVersion: 2
-        x: 11
+        x: 0
         y: 0
-        width: 1494
+        width: 1093
         height: 1024
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6fe4fcdd7a3c1b060800000000000000
-      internalID: 6967565224267173622
+      spriteID: 93f2e25d9724e9dd0800000000000000
+      internalID: -2477469653972144327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "ChatGPT Image 30 \u044F\u043D\u0432. 2026 \u0433., 14_05_11_1"
+      rect:
+        serializedVersion: 2
+        x: 1202
+        y: 570
+        width: 235
+        height: 228
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf259ffbcac227e40800000000000000
+      internalID: 5652629602770178812
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: "ChatGPT Image 30 \u044F\u043D\u0432. 2026 \u0433., 14_05_11_2"
+      rect:
+        serializedVersion: 2
+        x: 1200
+        y: 317
+        width: 244
+        height: 234
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 529545d01e1445990800000000000000
+      internalID: -7398215853015803611
       vertices: []
       indices: 
       edges: []
@@ -138,7 +188,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 368d1aca2df6ad54b8901144fe655c27
     internalID: 0
     vertices: []
     indices: 
@@ -146,9 +196,13 @@ TextureImporter:
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":2,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      2c261452-41c7-4d7c-ab4d-b30def42585a_0: 6967565224267173622
+      "ChatGPT Image 30 \u044F\u043D\u0432. 2026 \u0433., 14_05_11_0": -2477469653972144327
+      "ChatGPT Image 30 \u044F\u043D\u0432. 2026 \u0433., 14_05_11_1": 5652629602770178812
+      "ChatGPT Image 30 \u044F\u043D\u0432. 2026 \u0433., 14_05_11_2": -7398215853015803611
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -1,0 +1,47 @@
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class ResultUI : MonoBehaviour
+{
+    [Header("Root")]
+    [SerializeField] private GameObject root;
+
+    [Header("Scene")]
+    [SerializeField] private string gameSceneName = "Game";
+
+    [Header("Buttons")]
+    [SerializeField] private Button restartButton;
+
+    [Header("Services")]
+    [SerializeField] private AppRoot appRoot;
+
+    private void Awake()
+    {
+        if (restartButton != null) restartButton.onClick.AddListener(OnRestartClicked);
+        Hide();
+    }
+
+    private void OnDestroy()
+    {
+        if (restartButton != null) restartButton.onClick.RemoveListener(OnRestartClicked);
+    }
+
+    public void ShowWin()
+    {
+        if (root != null) root.SetActive(true);
+    }
+
+    public void Hide()
+    {
+        if (root != null) root.SetActive(false);
+    }
+
+    private void OnRestartClicked()
+    {
+        if (appRoot == null) appRoot = AppRoot.Instance;
+        if (appRoot != null && appRoot.Audio != null) appRoot.Audio.PlayClick();
+
+        SceneManager.LoadScene(gameSceneName);
+    }
+}

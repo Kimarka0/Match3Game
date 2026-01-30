@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 public class TileInputUI : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
-    private const float swipeThreshold = 20f;
+    private const float swipeThreshold = 30f;
 
     private Board board;
     private Tile tile;
