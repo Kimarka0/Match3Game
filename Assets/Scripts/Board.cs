@@ -16,15 +16,14 @@ public class Board : MonoBehaviour
     [SerializeField] private Transform tilesRoot;
     [SerializeField] private TileAnimator tileAnimator;
 
-    // Runtime
     private Cell[,] cells;
     private MatchChecker matchChecker;
     private BoardView boardView;
     private bool isBusy;
 
     public bool IsBusy => isBusy;
-    public Action OnMoveMade; // успешный ход (свап, который дал матч)
-    public Action<Dictionary<TileType, int>> OnTilesCleared; // сколько тайлов какого типа было удалено
+    public Action OnMoveMade; 
+    public Action<Dictionary<TileType, int>> OnTilesCleared; 
 
 
     private void Start()
@@ -32,9 +31,6 @@ public class Board : MonoBehaviour
         CreateBoard();
     }
 
-    // ============================================================
-    // Public API
-    // ============================================================
 
     public void TrySwapWithDirection(Tile tile, Vector2Int direction)
     {
@@ -68,10 +64,6 @@ public void ShuffleBoard()
 }
 
 
-    // ============================================================
-    // Board Setup
-    // ============================================================
-
     private void CreateBoard()
     {
         cells = new Cell[width, height];
@@ -102,9 +94,6 @@ public void ShuffleBoard()
         boardView.UpdateTilePosition(cell);
     }
 
-    // ============================================================
-    // Swap Flow
-    // ============================================================
 
     private IEnumerator TrySwapRoutine(Cell firstCell, Cell secondCell)
     {
@@ -119,36 +108,36 @@ public void ShuffleBoard()
             yield break;
         }
 
-        // 1) animate swap
+       
         Vector3 firstTarget = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
         Vector3 secondTarget = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
 
         yield return PlaySwapAndWait(firstTile, firstTarget, secondTile, secondTarget);
 
-        // 2) swap model data
+       
         SwapTilesDataOnly(firstCell, secondCell);
 
-        // 3) match check
+       
         bool hasMatch =
             matchChecker.HasMatchAt(firstCell.X, firstCell.Y) ||
             matchChecker.HasMatchAt(secondCell.X, secondCell.Y);
 
         if (!hasMatch)
         {
-            // 4) animate back
+            
             Vector3 firstBack = boardView.GetWorldPosition(firstCell.X, firstCell.Y);
             Vector3 secondBack = boardView.GetWorldPosition(secondCell.X, secondCell.Y);
 
             yield return PlaySwapAndWait(firstTile, firstBack, secondTile, secondBack);
 
-            // 5) revert data
+           
             SwapTilesDataOnly(firstCell, secondCell);
 
             isBusy = false;
             yield break;
         }
 
-        // 6) resolve cascades
+       
         OnMoveMade?.Invoke();
         yield return ResolveBoardRoutine();
 
@@ -162,9 +151,6 @@ public void ShuffleBoard()
         while (!finished) yield return null;
     }
 
-    // ============================================================
-    // Resolve / Matches / Gravity
-    // ============================================================
 
     private IEnumerator ResolveBoardRoutine()
     {
@@ -184,7 +170,6 @@ public void ShuffleBoard()
 
     private IEnumerator AnimateAndClearMatchesRoutine(List<Cell> matchedCells)
     {
-        // Collect tiles to animate delete
         List<Tile> matchedTiles = new List<Tile>(matchedCells.Count);
         for (int i = 0; i < matchedCells.Count; i++)
         {
@@ -212,7 +197,6 @@ public void ShuffleBoard()
         tileAnimator.PlayDelete(matchedTiles, () => finished = true);
         while (!finished) yield return null;
 
-        // Destroy and clear cells
         for (int i = 0; i < matchedCells.Count; i++)
         {
             Cell cell = matchedCells[i];
@@ -325,29 +309,23 @@ public void ShuffleBoard()
             tile.transform.position = targets[i];
         }
     }
-    // ============================================================
-// Rebuild / Shuffle
-// ============================================================
 
 private IEnumerator RebuildBoardRoutine()
 {
     isBusy = true;
 
-    // остановим любые анимационные корутины свапа/резолва, если вдруг
     StopAllCoroutines();
 
-    // но StopAllCoroutines остановит и эту рутину, поэтому запускаем заново:
     StartCoroutine(RebuildBoardRoutine_Internal());
     yield break;
 }
 
 private IEnumerator RebuildBoardRoutine_Internal()
 {
-    // 1) уничтожаем все тайлы
+   
     DestroyAllTiles();
-    yield return null; // дать кадр на обработку Destroy
+    yield return null; 
 
-    // 2) создаём борд заново (как в Start)
     CreateBoard();
 
     isBusy = false;
@@ -358,18 +336,16 @@ private IEnumerator ShuffleBoardRoutine()
 {
     isBusy = true;
 
-    // если нет борда — просто rebuild
     if (cells == null || matchChecker == null)
     {
         yield return RebuildBoardRoutine_Internal();
         yield break;
     }
 
-    bool ok = TryShuffleWithValidation(40); // 40 попыток перемешивания
+    bool ok = TryShuffleWithValidation(40); 
 
     if (!ok)
     {
-        // если не получилось сделать валидную доску — пересоздаём
         yield return RebuildBoardRoutine_Internal();
         yield break;
     }
@@ -377,9 +353,6 @@ private IEnumerator ShuffleBoardRoutine()
     isBusy = false;
 }
 
-// ------------------------------------------------------------
-// Shuffle internals
-// ------------------------------------------------------------
 
 private bool TryShuffleWithValidation(int attempts)
 {
@@ -391,10 +364,10 @@ private bool TryShuffleWithValidation(int attempts)
         ShuffleTypes(types);
         ApplyTypes(types);
 
-        // 1) на старте не должно быть готовых матчей
+        
         if (matchChecker.FindAllMatch().Count > 0) continue;
 
-        // 2) должен существовать хотя бы 1 ход
+        
         if (!HasAnyPossibleMove()) continue;
 
         return true;
@@ -431,7 +404,7 @@ private void ApplyTypes(List<TileType> types)
             Tile tile = cells[x, y].Tile;
             if (tile == null) continue;
 
-            // tile.Init обновит sprite и оставит input рабочим
+            
             tile.Init(types[index], this);
             index++;
         }
@@ -440,7 +413,6 @@ private void ApplyTypes(List<TileType> types)
 
 private void ShuffleTypes(List<TileType> list)
 {
-    // Fisher–Yates
     for (int i = list.Count - 1; i > 0; i--)
     {
         int j = UnityEngine.Random.Range(0, i + 1);
@@ -452,7 +424,6 @@ private void ShuffleTypes(List<TileType> list)
 
 private bool HasAnyPossibleMove()
 {
-    // проверяем только вправо и вверх (чтобы не дублировать проверки)
     for (int x = 0; x < width; x++)
     {
         for (int y = 0; y < height; y++)
@@ -490,10 +461,6 @@ private bool WouldSwapCreateMatch(Cell firstCell, Cell secondCell)
     return hasMatch;
 }
 
-// ------------------------------------------------------------
-// Rebuild internals
-// ------------------------------------------------------------
-
 private void DestroyAllTiles()
 {
     if (cells == null) return;
@@ -512,9 +479,6 @@ private void DestroyAllTiles()
 }
 
 
-    // ============================================================
-    // Helpers
-    // ============================================================
 
     private bool IsInsideBoard(int x, int y)
     {

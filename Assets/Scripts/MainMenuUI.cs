@@ -4,10 +4,6 @@ using UnityEngine.UI;
 
 public class MainMenuUI : MonoBehaviour
 {
-    // ============================================================
-    // Inspector
-    // ============================================================
-
     [Header("Scene")]
     [SerializeField] private string gameSceneName = "Game";
 
@@ -33,6 +29,11 @@ public class MainMenuUI : MonoBehaviour
             appRoot.YandexSdk.Init();
             appRoot.YandexSdk.GameReady();
         }
+
+        if (appRoot != null && appRoot.Audio != null)
+        {
+            appRoot.Audio.PlayMusic();
+        }
     }
 
     private void OnDestroy()
@@ -44,7 +45,12 @@ public class MainMenuUI : MonoBehaviour
     private void OnPlayClicked()
     {
         if (appRoot == null) appRoot = AppRoot.Instance;
-        if (appRoot != null && appRoot.Audio != null) appRoot.Audio.PlayClick();
+
+        if (appRoot != null && appRoot.Audio != null)
+        {
+            appRoot.Audio.PlayMusic(); 
+            appRoot.Audio.PlayClick();
+        }
 
         SceneManager.LoadScene(gameSceneName);
     }
@@ -56,5 +62,7 @@ public class MainMenuUI : MonoBehaviour
 
         appRoot.Audio.ToggleMute();
         appRoot.Audio.PlayClick();
+
+        appRoot.Audio.PlayMusic();
     }
 }

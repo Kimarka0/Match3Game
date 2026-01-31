@@ -3,7 +3,6 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
-
     [Header("Services")]
     [SerializeField] private AppRoot appRoot;
 
@@ -16,9 +15,18 @@ public class LevelManager : MonoBehaviour
 
     private bool isActive;
 
+    private AppRoot Root
+    {
+        get
+        {
+            if (appRoot == null) appRoot = AppRoot.Instance;
+            return appRoot;
+        }
+    }
+
     private void Awake()
     {
-        if (appRoot == null) appRoot = AppRoot.Instance;
+        appRoot = AppRoot.Instance;
 
         if (board != null)
         {
@@ -29,16 +37,17 @@ public class LevelManager : MonoBehaviour
         if (objectives != null)
         {
             objectives.OnChainCompleted += OnObjectivesCompleted;
+            objectives.OnFailed += OnObjectivesFailed;
         }
 
         if (resultUI != null) resultUI.Hide();
 
         isActive = true;
 
-        if (appRoot != null && appRoot.YandexSdk != null)
+        if (Root != null && Root.YandexSdk != null)
         {
-            appRoot.YandexSdk.GameReady();
-            appRoot.YandexSdk.GameplayStart();
+            Root.YandexSdk.GameReady();
+            Root.YandexSdk.GameplayStart();
         }
     }
 
@@ -53,35 +62,44 @@ public class LevelManager : MonoBehaviour
         if (objectives != null)
         {
             objectives.OnChainCompleted -= OnObjectivesCompleted;
+            objectives.OnFailed -= OnObjectivesFailed;
         }
     }
 
-    private void OnMoveMade()
-    {
-    }
+    private void OnMoveMade() { }
 
     private void OnTilesCleared(Dictionary<TileType, int> clearedByType)
     {
         if (!isActive) return;
 
         if (objectives != null) objectives.AddCleared(clearedByType);
-        if (appRoot != null && appRoot.Audio != null) appRoot.Audio.PlayMatch();
-    }
 
+        if (Root != null && Root.Audio != null)
+            Root.Audio.PlayMatch();
+    }
 
     private void OnObjectivesCompleted()
     {
         if (!isActive) return;
         isActive = false;
 
-        if (appRoot != null && appRoot.YandexSdk != null)
+        if (Root != null && Root.YandexSdk != null)
         {
-            appRoot.YandexSdk.GameplayStop();
-            appRoot.YandexSdk.ShowInterstitial();
+            Root.YandexSdk.GameplayStop();
+            Root.YandexSdk.ShowInterstitial();
         }
 
-        if (appRoot != null && appRoot.Audio != null) appRoot.Audio.PlayWin();
-
         if (resultUI != null) resultUI.ShowWin();
+    }
+
+    private void OnObjectivesFailed()
+    {
+        if (!isActive) return;
+        isActive = false;
+
+        if (Root != null && Root.YandexSdk != null)
+            Root.YandexSdk.GameplayStop();
+
+        if (resultUI != null) resultUI.ShowLose();
     }
 }

@@ -1,13 +1,9 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class HudUI : MonoBehaviour
 {
-    [Header("Scene")]
-    [SerializeField] private string menuSceneName = "Menu";
-
     [Header("Services")]
     [SerializeField] private AppRoot appRoot;
 
@@ -16,20 +12,16 @@ public class HudUI : MonoBehaviour
 
     [Header("Texts")]
     [SerializeField] private TextMeshProUGUI goalTitleText;
-    [SerializeField] private TextMeshProUGUI goalProgressText;
-    [SerializeField] private TextMeshProUGUI goalTimerText;
-
+    [SerializeField] private TextMeshProUGUI goalProgressText; 
+    [SerializeField] private TextMeshProUGUI goalTimerText;     
+    [SerializeField] private TextMeshProUGUI failsText;        
     [Header("Buttons")]
-    [SerializeField] private Button menuButton;
     [SerializeField] private Button soundButton;
 
     private void Awake()
     {
-        if (menuButton != null) menuButton.onClick.AddListener(OnMenuClicked);
         if (soundButton != null) soundButton.onClick.AddListener(OnSoundClicked);
-
-        if (objectives != null)
-            objectives.OnStateChanged += Refresh;
+        if (objectives != null) objectives.OnStateChanged += Refresh;
     }
 
     private void Start()
@@ -40,11 +32,8 @@ public class HudUI : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (menuButton != null) menuButton.onClick.RemoveListener(OnMenuClicked);
         if (soundButton != null) soundButton.onClick.RemoveListener(OnSoundClicked);
-
-        if (objectives != null)
-            objectives.OnStateChanged -= Refresh;
+        if (objectives != null) objectives.OnStateChanged -= Refresh;
     }
 
     private void Refresh()
@@ -54,27 +43,37 @@ public class HudUI : MonoBehaviour
         int goalIndex = Mathf.Clamp(objectives.GoalsCompleted + 1, 1, objectives.GoalsToComplete);
 
         if (goalTitleText != null)
-            goalTitleText.text = $"Goal {goalIndex}/{objectives.GoalsToComplete}: Collect {objectives.CurrentType}";
+            goalTitleText.text = $"Цель {goalIndex}/{objectives.GoalsToComplete} {ShortType(objectives.CurrentType)}";
 
         if (goalProgressText != null)
-            goalProgressText.text = $"Progress: {objectives.CurrentProgress}/{objectives.CurrentTarget}";
+            goalProgressText.text = $"{objectives.CurrentProgress}/{objectives.CurrentTarget}";
 
         if (goalTimerText != null)
         {
             int sec = Mathf.Max(0, Mathf.CeilToInt(objectives.TimeLeft));
-            goalTimerText.text = $"Time: {sec}s";
+            goalTimerText.text = $"{sec}с";
         }
+
+        if (failsText != null)
+            failsText.text = $"Ошибки {objectives.Fails}/{objectives.FailsAllowed}";
+            Debug.Log($"[HUD] objectives={objectives?.name} goalsToComplete={objectives?.GoalsToComplete} id={objectives?.GetInstanceID()}");
+
     }
 
-    private void OnMenuClicked()
+    private static string ShortType(TileType t)
+{
+    return t switch
     {
-        if (appRoot == null) appRoot = AppRoot.Instance;
-
-        if (appRoot != null && appRoot.Audio != null) appRoot.Audio.PlayClick();
-        if (appRoot != null && appRoot.YandexSdk != null) appRoot.YandexSdk.GameplayStop();
-
-        SceneManager.LoadScene(menuSceneName);
-    }
+        TileType.Strawberry => "Клубника",
+        TileType.Apple      => "Яблоко",
+        TileType.Banana     => "Банан",
+        TileType.Blueberry  => "Черника",
+        TileType.Grape      => "Виноград",
+        TileType.Orange     => "Апельсин",
+        TileType.Pear       => "Груша",
+        _ => t.ToString()
+    };
+}
 
     private void OnSoundClicked()
     {

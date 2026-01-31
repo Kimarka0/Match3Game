@@ -2,18 +2,10 @@ using UnityEngine;
 
 public class AppRoot : MonoBehaviour
 {
-    // ============================================================
-    // Inspector
-    // ============================================================
 
     [Header("Services")]
     [SerializeField] private YandexSdkBridge yandexSdk;
     [SerializeField] private AudioManager audioManager;
-
-    // ============================================================
-    // Singleton
-    // ============================================================
-
     public static AppRoot Instance { get; private set; }
 
     public YandexSdkBridge YandexSdk => yandexSdk;

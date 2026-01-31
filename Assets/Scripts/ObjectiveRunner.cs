@@ -4,10 +4,12 @@ using UnityEngine;
 
 public class ObjectiveRunner : MonoBehaviour
 {
-
     [Header("Rules")]
     [SerializeField] private int goalsToComplete = 5;
     [SerializeField] private float timePerGoal = 60f;
+
+    [Header("Lose Condition")]
+    [SerializeField] private int failsAllowed = 3;
 
     [Header("Collect Goal Settings")]
     [SerializeField] private TileType[] allowedTypes =
@@ -21,9 +23,8 @@ public class ObjectiveRunner : MonoBehaviour
         TileType.Pear
     };
 
-    [SerializeField] private int minCollectCount = 8;
-    [SerializeField] private int maxCollectCount = 20;
-
+    [SerializeField] private int minCollectCount;
+    [SerializeField] private int maxCollectCount;
 
     public int GoalsCompleted { get; private set; }
     public int GoalsToComplete => goalsToComplete;
@@ -37,8 +38,12 @@ public class ObjectiveRunner : MonoBehaviour
 
     public bool IsFinished { get; private set; }
 
+    public int Fails { get; private set; }
+    public int FailsAllowed => failsAllowed;
+
     public event Action OnStateChanged;
     public event Action OnChainCompleted;
+    public event Action OnFailed;
 
     private System.Random rnd;
 
@@ -52,16 +57,26 @@ public class ObjectiveRunner : MonoBehaviour
     {
         if (IsFinished) return;
 
-        TimeLeft -= Time.unscaledDeltaTime;
+        TimeLeft -= Time.deltaTime;
+
         if (TimeLeft <= 0f)
         {
+            Fails++;
+
+            if (Fails > failsAllowed)
+            {
+                IsFinished = true;
+                OnStateChanged?.Invoke();
+                OnFailed?.Invoke();
+                return;
+            }
+
             StartNewGoal(resetChain: false);
             return;
         }
 
         OnStateChanged?.Invoke();
     }
-
 
     public void AddCleared(Dictionary<TileType, int> clearedByType)
     {
@@ -97,12 +112,12 @@ public class ObjectiveRunner : MonoBehaviour
         StartNewGoal(resetChain: true);
     }
 
-
     private void StartNewGoal(bool resetChain)
     {
         if (resetChain)
         {
             GoalsCompleted = 0;
+            Fails = 0;
             IsFinished = false;
         }
 

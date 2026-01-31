@@ -2,22 +2,19 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    // ============================================================
-    // Inspector
-    // ============================================================
-
-    [Header("Audio Source")]
+    [Header("Audio Sources")]
     [SerializeField] private AudioSource sfxSource;
+    [SerializeField] private AudioSource musicSource;
 
-    [Header("Clips")]
+    [Header("Music")]
+    [SerializeField] private AudioClip backgroundMusic;
+    [SerializeField] private bool playMusicOnAwake = true;
+
+    [Header("SFX Clips")]
     [SerializeField] private AudioClip clickClip;
     [SerializeField] private AudioClip matchClip;
     [SerializeField] private AudioClip winClip;
     [SerializeField] private AudioClip loseClip;
-
-    // ============================================================
-    // Runtime
-    // ============================================================
 
     private bool isMuted;
     private bool isPlatformMuted;
@@ -31,11 +28,18 @@ public class AudioManager : MonoBehaviour
         if (sfxSource == null) sfxSource = GetComponent<AudioSource>();
         LoadMute();
         ApplyMute();
-    }
 
-    // ============================================================
-    // User API
-    // ============================================================
+        if (musicSource != null)
+        {
+            musicSource.loop = true;
+
+            if (backgroundMusic != null && musicSource.clip != backgroundMusic)
+                musicSource.clip = backgroundMusic;
+
+            if (playMusicOnAwake)
+                TryPlayMusic();
+        }
+    }
 
     public void ToggleMute()
     {
@@ -44,24 +48,39 @@ public class AudioManager : MonoBehaviour
         ApplyMute();
     }
 
-    // ============================================================
-    // Platform API
-    // ============================================================
-
     public void SetPlatformMuted(bool muted)
     {
         isPlatformMuted = muted;
         ApplyMute();
     }
 
-    // ============================================================
-    // Play
-    // ============================================================
+    public void PlayClick() { EnsureMusicStarted(); PlayOneShot(clickClip); }
+    public void PlayMatch() { EnsureMusicStarted(); PlayOneShot(matchClip); }
+    public void PlayWin() { EnsureMusicStarted(); PlayOneShot(winClip); }
+    public void PlayLose() { EnsureMusicStarted(); PlayOneShot(loseClip); }
 
-    public void PlayClick() { PlayOneShot(clickClip); }
-    public void PlayMatch() { PlayOneShot(matchClip); }
-    public void PlayWin() { PlayOneShot(winClip); }
-    public void PlayLose() { PlayOneShot(loseClip); }
+    public void PlayMusic()
+    {
+        TryPlayMusic(forceRestart: false);
+    }
+
+    public void StopMusic()
+    {
+        if (musicSource == null) return;
+        musicSource.Stop();
+    }
+
+    public void SetMusicClip(AudioClip clip, bool restart = true)
+    {
+        backgroundMusic = clip;
+        if (musicSource == null) return;
+
+        musicSource.clip = backgroundMusic;
+
+        if (restart)
+            TryPlayMusic(forceRestart: true);
+    }
+
 
     private void PlayOneShot(AudioClip clip)
     {
@@ -72,9 +91,32 @@ public class AudioManager : MonoBehaviour
         sfxSource.PlayOneShot(clip);
     }
 
-    // ============================================================
-    // Persistence
-    // ============================================================
+    private void EnsureMusicStarted()
+    {
+        if (!playMusicOnAwake) return;
+        TryPlayMusic();
+    }
+
+    private void TryPlayMusic(bool forceRestart = false)
+    {
+        if (musicSource == null) return;
+        if (musicSource.mute) return;
+
+        if (musicSource.clip == null && backgroundMusic != null)
+            musicSource.clip = backgroundMusic;
+
+        if (musicSource.clip == null) return;
+
+        if (forceRestart)
+        {
+            musicSource.Stop();
+            musicSource.Play();
+            return;
+        }
+
+        if (!musicSource.isPlaying)
+            musicSource.Play();
+    }
 
     private void SaveMute()
     {
@@ -89,7 +131,9 @@ public class AudioManager : MonoBehaviour
 
     private void ApplyMute()
     {
-        if (sfxSource == null) return;
-        sfxSource.mute = isMuted || isPlatformMuted;
+        bool muted = isMuted || isPlatformMuted;
+
+        if (sfxSource != null) sfxSource.mute = muted;
+        if (musicSource != null) musicSource.mute = muted;
     }
 }
