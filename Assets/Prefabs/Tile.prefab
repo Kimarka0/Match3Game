@@ -33,10 +33,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 1.7391304, y: 1.7391304}
+  m_SizeDelta: {x: -954.26086, y: -596.26086}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!212 &4061598333088774577
 SpriteRenderer:
@@ -118,9 +118,6 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fbb6c45b2e0f5424cace793121f03e56, type: 3}
   - {fileID: 21300000, guid: 5b0c287fddf11b24d910a6b285ee1807, type: 3}
   - {fileID: 21300000, guid: 50dd2e8acaa7426438d693e39eb73026, type: 3}
-  onTileDestroyed:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!222 &7345447692377554353
 CanvasRenderer:
   m_ObjectHideFlags: 0
