@@ -46,16 +46,16 @@ public class HudUI : MonoBehaviour
             goalTitleText.text = $"Цель {goalIndex}/{objectives.GoalsToComplete} {ShortType(objectives.CurrentType)}";
 
         if (goalProgressText != null)
-            goalProgressText.text = $"{objectives.CurrentProgress}/{objectives.CurrentTarget}";
+            goalProgressText.text = $"Выполнено: {objectives.CurrentProgress}/{objectives.CurrentTarget}";
 
         if (goalTimerText != null)
         {
             int sec = Mathf.Max(0, Mathf.CeilToInt(objectives.TimeLeft));
-            goalTimerText.text = $"{sec}с";
+            goalTimerText.text = $"{sec}";
         }
 
         if (failsText != null)
-            failsText.text = $"Ошибки {objectives.Fails}/{objectives.FailsAllowed}";
+            failsText.text = $"Неудачи: {objectives.Fails}/{objectives.FailsAllowed}";
             Debug.Log($"[HUD] objectives={objectives?.name} goalsToComplete={objectives?.GoalsToComplete} id={objectives?.GetInstanceID()}");
 
     }
